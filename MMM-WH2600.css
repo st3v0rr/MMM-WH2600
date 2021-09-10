@@ -1,0 +1,58 @@
+.wh2600-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
+}
+
+.wh2600-temp-block {
+  width: 220px;
+  height: auto;
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-bottom: 30px;
+}
+
+.fade-in-and-out {
+  opacity: 1;
+  animation: fade 1s linear;
+}
+
+@keyframes fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.wh2600-text-align-right {
+  text-align: right;
+}
+
+.wh2600-text-align-left {
+  text-align: left;
+}
+
+.wh2600-icon-space {
+  vertical-align: top;
+}
+
+.wh2600-value-space {
+  display: inline-block;
+  min-width: 70px;
+  margin-left: 10px;
+}
+
+.wh2600-unit-space {
+  display: inline-block;
+  width: 55px;
+  min-width: 55px;
+  margin-left: 10px;
+}
+
+.wh2600-xxlarge {
+  width: 120px;
+  height: 120px;
+  border: 2px solid var(--color-text-dimmed);
+  font-size: 120px;
+  line-height: 120px;
+  border-radius: 50%;
+}
