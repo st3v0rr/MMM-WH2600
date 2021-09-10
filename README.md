@@ -74,7 +74,7 @@ var config = {
 
 | Option                            | Description
 |-----------------                  |-----------
-| `ipWH2600`                        | *Required* An API Key that can be obtained by creating one in your WH2600 Monitoring Portal https://monitoring.solaredge.com
+| `ipWH2600`                        | *Required* IP of the WH2600 data logger
 | `locationInfo`                    | *Optional* Some additional informations to the location of the WH2600
 | `locationMetersAboveSeaLevel`     | *Optional* Nice to have for correct calcluation of the atmospheric pressure
 | `indoorSensors`                   | *Optional* Show additional indoor sensors (see advanced config)
