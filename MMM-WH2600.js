@@ -274,7 +274,7 @@ Module.register("MMM-WH2600", {
     wrapperWindSpeedData.appendChild(
       this.createDataRow(
         "",
-        (data.windspeed / 3.6).toFixed(1).replace(".", ","),
+        (data.windspeed * 3.6).toFixed(1).replace(".", ","),
         "wi-windy",
         "medium",
         "km/h",
@@ -284,7 +284,7 @@ Module.register("MMM-WH2600", {
     wrapperWindSpeedData.appendChild(
       this.createDataRow(
         "",
-        (data.gustspeed / 3.6).toFixed(1).replace(".", ","),
+        (data.gustspeed * 3.6).toFixed(1).replace(".", ","),
         "wi-strong-wind",
         "small",
         "km/h",
@@ -294,7 +294,7 @@ Module.register("MMM-WH2600", {
     wrapperWindSpeedData.appendChild(
       this.createDataRow(
         "",
-        (data.daymaxwind / 3.6).toFixed(1).replace(".", ","),
+        (data.daymaxwind * 3.6).toFixed(1).replace(".", ","),
         "wi-day-windy",
         "small",
         "km/h",
