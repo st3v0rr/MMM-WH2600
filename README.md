@@ -9,6 +9,14 @@ A Module for MagicMirror2 designed to integrate with a WH2600 System. Dependent 
 - UV index
 - Rain data
 
+## Installation
+Go to your MagicMirror folder.
+```bash
+cd modules
+git clone https://github.com/st3v0rr/MMM-WH2600.git
+```
+Wait until npm has finished.
+
 ## Using the module
 
 To use this module, add the following configuration block to the modules array in the `config/config.js` file:
@@ -77,6 +85,7 @@ var config = {
 | `ipWH2600`                        | *Required* IP of the WH2600 data logger
 | `locationInfo`                    | *Optional* Some additional informations to the location of the WH2600
 | `locationMetersAboveSeaLevel`     | *Optional* Nice to have for correct calcluation of the atmospheric pressure
+| `tempSwitchInterval`              | *Optional* Time between switching the temp sensors (default is 5 seconds)
 | `indoorSensors`                   | *Optional* Show additional indoor sensors (see advanced config)
 | `outdoorSensors`                  | *Optional* Show additional outdoor sensors (see advanced config)
 

@@ -10,10 +10,10 @@
 Module.register("MMM-WH2600", {
   defaults: {
     updateInterval: 8000,
-    retryDelay: 5000,
     ipWH2600: "", //ip of your WH2600 data logger
     locationInfo: "",
     locationMetersAboveSeaLevel: 0, //location of the weather station - important for atmospheric pressure calculation
+    tempSwitchInterval: 5000,
     indoorSensors: [
       {
         label: "",
@@ -50,7 +50,7 @@ Module.register("MMM-WH2600", {
       self.nextOutdoorSensor();
       self.getCurrentData();
       self.updateDom();
-    }, this.config.updateInterval);
+    }, this.config.tempSwitchInterval);
 
     this.loaded = true;
   },
