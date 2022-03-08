@@ -14,6 +14,8 @@ Go to your MagicMirror folder.
 ```bash
 cd modules
 git clone https://github.com/st3v0rr/MMM-WH2600.git
+cd MMM-WH2600
+npm i
 ```
 Wait until npm has finished.
 
