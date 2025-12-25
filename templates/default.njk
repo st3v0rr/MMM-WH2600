@@ -29,11 +29,11 @@
           </div>
         </div>
         <div class="wh2600-metric-row">
-          <span class="wh2600-metric-icon"><i class="wi wi-alien"></i></span>
+          <span class="wh2600-metric-icon"><i class="wi wi-alien small"></i></span>
           <span class="wh2600-metric-value medium bright">{{ perceivedTemperature }}<span class="wh2600-unit small bright">°C</span></span>
         </div>
         <div class="wh2600-metric-row">
-          <span class="wh2600-metric-icon"><i class="wi wi-barometer"></i></span>
+          <span class="wh2600-metric-icon"><i class="wi wi-barometer small"></i></span>
           <span class="wh2600-metric-value medium bright">{{ atmosphericPressure }}<span class="wh2600-unit small bright"> hPa</span></span>
         </div>
       </div>
@@ -41,15 +41,15 @@
       <div class="wh2600-panel">
         <div class="wh2600-panel-title">{{ translations.wind }}</div>
         <div class="wh2600-metric-row">
-          <div class="wh2600-metric-icon"><i class="wi wi-windy"></i></div>
+          <div class="wh2600-metric-icon"><i class="wi wi-windy small"></i></div>
           <div class="wh2600-metric-value medium bright">{{ data.windspeed }}<span class="wh2600-unit small bright"> m/s</span></div>
         </div>
         <div class="wh2600-metric-row">
-          <span class="wh2600-metric-icon"><i class="wi wi-wind-beaufort-{{ beaufort }}"></i></span>
+          <span class="wh2600-metric-icon"><i class="wi wi-wind-beaufort-{{ beaufort }} small"></i></span>
           <span class="wh2600-metric-value medium bright">{{ data.gustspeed }}<span class="wh2600-unit small bright"> m/s</span></span>
         </div>
         <div class="wh2600-metric-row">
-          <span class="wh2600-metric-icon"><i class="wi wi-day-windy"></i></span>
+          <span class="wh2600-metric-icon"><i class="wi wi-day-windy small"></i></span>
           <span class="wh2600-metric-value medium bright">{{ data.daymaxwind }}<span class="wh2600-unit small bright"> m/s</span></span>
         </div>
         <div class="wh2600-metric-row">
@@ -66,7 +66,7 @@
       <div class="wh2600-panel">
         <div class="wh2600-panel-title">{{ translations.uvindex }}</div>
         <div class="wh2600-metric-row" style="color: {{ uvIndexColor }}">
-          <span class="wh2600-metric-icon"><i class="wi wi-hot"></i></span>
+          <span class="wh2600-metric-icon"><i class="wi wi-hot small"></i></span>
           <span class="wh2600-metric-value medium">{{ data.uvi }}</span>
         </div>
 
