@@ -9,7 +9,7 @@
 
 Module.register("MMM-WH2600", {
   defaults: {
-    updateInterval: 8000,
+    updateInterval: 10000,
     ipWH2600: "", //ip of your WH2600 data logger
     locationInfo: "",
     locationMetersAboveSeaLevel: 0, //location of the weather station - important for atmospheric pressure calculation
@@ -93,152 +93,24 @@ Module.register("MMM-WH2600", {
     }
   },
 
-  getCurrentData: function () {
-    this.sendSocketNotification(
-      "MMM-WH2600-NOTIFICATION_CURRENTDATA_REQUESTED",
-      {
-        config: this.config
-      }
-    );
-  },
+  calculatePerceivedTemperature(data) {
+    const T = data.outtemp;
+    const rh = data.outhumid;
+    const v = data.windspeed;
+    const uv = data.uv;
 
-  getHeader: function () {
-    if (this.config.locationInfo.length > 0) {
-      return this.translate("TITLE") + " - " + this.config.locationInfo;
-    }
-    return this.translate("TITLE");
-  },
+    // Clima-Michel-Mdel
+    const e = (rh / 100) * 6.105 * Math.exp((17.27 * T) / (237.7 + T));
+    let at = T + 0.348 * e - 0.7 * v + 0.70 * (uv / 100) - 4.25;
 
-  createDataRow: function (
-    label,
-    value,
-    icon,
-    sizeIcon,
-    unit,
-    sizeValue,
-    color
-  ) {
-    var dataRow = document.createElement("div");
-    dataRow.classList.add("wh2600-text-align-right");
-
-    var dataRowIcon = document.createElement("i");
-    dataRowIcon.classList.add("wi");
-    dataRowIcon.classList.add(icon);
-    dataRowIcon.classList.add(sizeIcon);
-
-    var dataRowIconWrapper = document.createElement("span");
-    dataRowIconWrapper.classList.add("wh2600-icon-space");
-    dataRowIconWrapper.innerHTML = label + " ";
-    dataRowIconWrapper.appendChild(dataRowIcon);
-
-    var dataRowValue = document.createElement("span");
-    dataRowValue.classList.add("wh2600-value-space");
-    dataRowValue.innerHTML = value;
-    dataRowValue.classList.add(sizeValue);
-    var dataRowUnit = document.createElement("span");
-    dataRowUnit.innerHTML = unit;
-    dataRowUnit.classList.add(sizeIcon);
-    dataRowUnit.classList.add("wh2600-unit-space");
-    dataRowUnit.classList.add("wh2600-text-align-left");
-
-    if (color) {
-      dataRowIcon.style = "color:" + color;
-      dataRowValue.style = "color:" + color;
-      dataRowUnit.style = "color:" + color;
+    // Cold temperature correction
+    if (T <= 10 && v > 1.3) {
+      const vKmH = v * 3.6;
+      const windChill = 13.12 + 0.6215 * T - 11.37 * Math.pow(vKmH, 0.16) + 0.3965 * T * Math.pow(vKmH, 0.16);
+      at = Math.min(at, windChill);
     }
 
-    dataRow.appendChild(dataRowIconWrapper);
-    dataRow.appendChild(dataRowValue);
-    dataRow.appendChild(dataRowUnit);
-
-    return dataRow;
-  },
-
-  createIndoorOutdoorData: function (data) {
-    var wrapperIndoorOutdoorData = document.createElement("div");
-
-    var wrapperIndoorData = document.createElement("div");
-    if (this.config.indoorSensors.length > 1) {
-      wrapperIndoorData.classList.add("fade-in-and-out");
-    }
-    var headerIndoorData = document.createElement("header");
-    headerIndoorData.innerHTML =
-      this.config.indoorSensors[this.currentIndoorSensorIndex].label.length > 0
-        ? this.config.indoorSensors[this.currentIndoorSensorIndex].label
-        : this.translate("INDOOR") + (this.currentIndoorSensorIndex + 1);
-    wrapperIndoorData.appendChild(headerIndoorData);
-    wrapperIndoorData.classList.add("wh2600-temp-block");
-    wrapperIndoorData.appendChild(
-      this.createDataRow(
-        "",
-        data[this.config.indoorSensors[this.currentIndoorSensorIndex].temp]
-          .toFixed(1)
-          .replace(".", ","),
-        "wi-thermometer",
-        "medium",
-        "°C",
-        "large"
-      )
-    );
-    wrapperIndoorData.appendChild(
-      this.createDataRow(
-        "",
-        data[this.config.indoorSensors[this.currentIndoorSensorIndex].humid],
-        "wi-humidity",
-        "small",
-        "%",
-        "medium"
-      )
-    );
-
-    var wrapperOutdoorData = document.createElement("div");
-    if (this.config.outdoorSensors.length > 1) {
-      wrapperOutdoorData.classList.add("fade-in-and-out");
-    }
-    var headerOutdoorData = document.createElement("header");
-    headerOutdoorData.innerHTML =
-      this.config.outdoorSensors[this.currentOutdoorSensorIndex].label.length >
-      0
-        ? this.config.outdoorSensors[this.currentOutdoorSensorIndex].label
-        : this.translate("OUTDOOR") + (this.currentOutdoorSensorIndex + 1);
-    wrapperOutdoorData.appendChild(headerOutdoorData);
-    wrapperOutdoorData.classList.add("wh2600-temp-block");
-    wrapperOutdoorData.appendChild(
-      this.createDataRow(
-        "",
-        data[this.config.outdoorSensors[this.currentOutdoorSensorIndex].temp]
-          .toFixed(1)
-          .replace(".", ","),
-        "wi-thermometer",
-        "medium",
-        "°C",
-        "large"
-      )
-    );
-    wrapperOutdoorData.appendChild(
-      this.createDataRow(
-        "",
-        data[this.config.outdoorSensors[this.currentOutdoorSensorIndex].humid],
-        "wi-humidity",
-        "small",
-        "%",
-        "medium"
-      )
-    );
-    wrapperOutdoorData.appendChild(
-      this.createDataRow(
-        "",
-        this.calculateRelativeAtmosphericPressure(data.absbarometer),
-        "wi-barometer",
-        "small",
-        "hPa",
-        "medium"
-      )
-    );
-
-    wrapperIndoorOutdoorData.appendChild(wrapperIndoorData);
-    wrapperIndoorOutdoorData.appendChild(wrapperOutdoorData);
-    return wrapperIndoorOutdoorData;
+    return parseFloat(at.toFixed(1));
   },
 
   degreesToCompass: function (degrees) {
@@ -263,65 +135,38 @@ Module.register("MMM-WH2600", {
     ][Math.round(degrees / 11.25 / 2)];
   },
 
-  createWindData: function (data) {
-    var wrapperWindData = document.createElement("div");
+  getBeaufort(gustspeed) {
+    let beaufort = 0;
 
-    var wrapperWindSpeedData = document.createElement("div");
-    var headerWindSpeedData = document.createElement("header");
-    headerWindSpeedData.innerHTML = this.translate("WIND");
-    wrapperWindSpeedData.appendChild(headerWindSpeedData);
-    wrapperWindSpeedData.classList.add("wh2600-temp-block");
-    wrapperWindSpeedData.appendChild(
-      this.createDataRow(
-        "",
-        (data.windspeed * 3.6).toFixed(1).replace(".", ","),
-        "wi-windy",
-        "medium",
-        "km/h",
-        "large"
-      )
-    );
-    wrapperWindSpeedData.appendChild(
-      this.createDataRow(
-        "",
-        (data.gustspeed * 3.6).toFixed(1).replace(".", ","),
-        "wi-strong-wind",
-        "small",
-        "km/h",
-        "medium"
-      )
-    );
-    wrapperWindSpeedData.appendChild(
-      this.createDataRow(
-        "",
-        (data.daymaxwind * 3.6).toFixed(1).replace(".", ","),
-        "wi-day-windy",
-        "small",
-        "km/h",
-        "medium"
-      )
-    );
+    if (gustspeed < 0.3) {
+      beaufort = 0;
+    } else if (gustspeed < 1.6) {
+      beaufort = 1;
+    } else if (gustspeed < 3.4) {
+      beaufort = 2;
+    } else if (gustspeed < 5.5) {
+      beaufort = 3;
+    } else if (gustspeed < 8.0) {
+      beaufort = 4;
+    } else if (gustspeed < 10.8) {
+      beaufort = 5;
+    } else if (gustspeed < 13.9) {
+      beaufort = 6;
+    } else if (gustspeed < 17.2) {
+      beaufort = 7;
+    } else if (gustspeed < 20.8) {
+      beaufort = 8;
+    } else if (gustspeed < 24.5) {
+      beaufort = 9;
+    } else if (gustspeed < 28.5) {
+      beaufort = 10;
+    } else if (gustspeed < 32.7) {
+      beaufort = 11;
+    } else {
+      beaufort = 12;
+    }
 
-    wrapperWindSpeedData.appendChild(
-      this.createDataRow(
-        "",
-        data.winddir,
-        "wi-wind-direction",
-        "small",
-        "° " + this.translate(this.degreesToCompass(data.winddir)),
-        "medium"
-      )
-    );
-    var wrapperWindDirection = document.createElement("div");
-    wrapperWindDirection.classList.add("wh2600-xxlarge");
-    wrapperWindDirection.classList.add("wi");
-    wrapperWindDirection.classList.add("wi-direction-down");
-    wrapperWindDirection.style.transform = "rotate(" + data.winddir + "deg)";
-
-    wrapperWindSpeedData.appendChild(wrapperWindDirection);
-
-    wrapperWindData.appendChild(wrapperWindSpeedData);
-    return wrapperWindData;
+    return beaufort;
   },
 
   uvIndexToColor: function (uvi) {
@@ -346,109 +191,62 @@ Module.register("MMM-WH2600", {
     }
   },
 
-  createUvLightRainData: function (data) {
-    var wrapperUvLightRainData = document.createElement("div");
-
-    var wrapperUvData = document.createElement("div");
-    var headerUvData = document.createElement("header");
-    headerUvData.innerHTML = this.translate("UVINDEX");
-    wrapperUvData.appendChild(headerUvData);
-    wrapperUvData.classList.add("wh2600-temp-block");
-
-    wrapperUvData.appendChild(
-      this.createDataRow(
-        "",
-        data.uvi,
-        "wi-hot",
-        "large",
-        "",
-        "xlarge",
-        this.uvIndexToColor(data.uvi)
-      )
+  getCurrentData: function () {
+    this.sendSocketNotification(
+      "MMM-WH2600-NOTIFICATION_CURRENTDATA_REQUESTED",
+      {
+        config: this.config
+      }
     );
-
-    var wrapperRainData = document.createElement("div");
-    var headerRainData = document.createElement("header");
-    headerRainData.innerHTML = this.translate("RAIN");
-    wrapperRainData.appendChild(headerRainData);
-    wrapperRainData.classList.add("wh2600-temp-block");
-
-    wrapperRainData.appendChild(
-      this.createDataRow(
-        this.translate("NOW"),
-        data.rainrate,
-        "wi-raindrop",
-        "small",
-        "mm",
-        "medium"
-      )
-    );
-    wrapperRainData.appendChild(
-      this.createDataRow(
-        this.translate("TODAY"),
-        data.rainday,
-        "wi-raindrop",
-        "small",
-        "mm",
-        "medium"
-      )
-    );
-    wrapperRainData.appendChild(
-      this.createDataRow(
-        this.translate("WEEK"),
-        data.rainweek,
-        "wi-raindrop",
-        "small",
-        "mm",
-        "medium"
-      )
-    );
-    wrapperRainData.appendChild(
-      this.createDataRow(
-        this.translate("MONTH"),
-        data.rainmonth,
-        "wi-raindrop",
-        "small",
-        "mm",
-        "medium"
-      )
-    );
-
-    wrapperUvLightRainData.appendChild(wrapperUvData);
-    wrapperUvLightRainData.appendChild(wrapperRainData);
-    return wrapperUvLightRainData;
   },
 
-  getDom: function () {
-    // create element wrapper for show into the module
-    var wrapper = document.createElement("div");
-    if (this.config.ipWH2600 === "") {
-      wrapper.innerHTML = "Missing configuration for MMM-WH2600.";
-      return wrapper;
+  getHeader: function () {
+    if (this.config.locationInfo.length > 0) {
+      return this.translate("TITLE") + " - " + this.config.locationInfo;
     }
-    if (!this.loaded) {
-      wrapper.innerHTML = "Loading MMM-WH2600...";
-      return wrapper;
-    }
-
-    // Data from helper
-    if (this.dataNotificationCurrentData) {
-      var wrapperCurrentData = document.createElement("div");
-      wrapperCurrentData.classList.add("wh2600-container");
-
-      wrapperCurrentData.appendChild(
-        this.createIndoorOutdoorData(this.dataNotificationCurrentData)
-      );
-      wrapperCurrentData.appendChild(
-        this.createWindData(this.dataNotificationCurrentData)
-      );
-      wrapperCurrentData.appendChild(
-        this.createUvLightRainData(this.dataNotificationCurrentData)
-      );
-      wrapper.appendChild(wrapperCurrentData);
-    }
-    return wrapper;
+    return this.translate("TITLE");
   },
+
+  getTemplate: function() {
+	  return "templates/default.njk"
+  },
+
+	getTemplateData: function () {
+		if (!this.loaded) {
+			return {
+				status: "Loading MMM-WH2600...",
+				config: this.config
+			};
+		}
+
+		if (this.dataNotificationCurrentData !== undefined) {
+			return {
+				config: this.config,
+				data: this.dataNotificationCurrentData,
+        indoorSensorLabel: this.config.indoorSensors[this.currentIndoorSensorIndex].label,
+        indoorSensorTemperature: this.dataNotificationCurrentData[this.config.indoorSensors[this.currentIndoorSensorIndex].temp],
+        indoorSensorHumidity: this.dataNotificationCurrentData[this.config.indoorSensors[this.currentIndoorSensorIndex].humid],
+        outdoorSensorLabel: this.config.outdoorSensors[this.currentOutdoorSensorIndex].label,
+        outdoorSensorTemperature: this.dataNotificationCurrentData[this.config.outdoorSensors[this.currentOutdoorSensorIndex].temp],
+        outdoorSensorHumidity: this.dataNotificationCurrentData[this.config.outdoorSensors[this.currentOutdoorSensorIndex].humid],
+        atmosphericPressure: this.calculateRelativeAtmosphericPressure(this.dataNotificationCurrentData.absbarometer),
+        perceivedTemperature: this.calculatePerceivedTemperature(this.dataNotificationCurrentData),
+        windDirText: this.translate(this.degreesToCompass(this.dataNotificationCurrentData.winddir)),
+        beaufort: this.getBeaufort(this.dataNotificationCurrentData.gustspeed),
+        uvIndexColor: this.uvIndexToColor(this.dataNotificationCurrentData.uvi),
+        translations: {
+          wind: this.translate("WIND"),
+          uvindex: this.translate("UVINDEX"),
+          rain: this.translate("RAIN")
+        }
+			};
+		}
+
+		return {
+			status: "Loading MMM-WH2600...",
+			config: this.config
+		};
+	},
 
   getScripts: function () {
     return ["WH2600.js", "WH2600Utils.js"];

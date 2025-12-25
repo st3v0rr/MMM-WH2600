@@ -22,9 +22,5 @@
 	"NORTH_NORTH_WEST": "NNW",
 	"NORTH_MAX": "N",
 	"UVINDEX": "UV-Index",
-	"RAIN": "Regen",
-	"NOW": "Aktuell",
-	"TODAY": "Heute",
-	"WEEK": "Woche",
-	"MONTH": "Monat"
+	"RAIN": "Regen"
 }
