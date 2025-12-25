@@ -20,7 +20,6 @@ module.exports = NodeHelper.create({
 
     if (notification === "MMM-WH2600-NOTIFICATION_CURRENTDATA_REQUESTED") {
       new WH2600(payload.config.ipWH2600).getLiveData().then((body) => {
-		  console.log(body);
         self.sendSocketNotification(
           "MMM-WH2600-NOTIFICATION_CURRENTDATA_RECEIVED",
           body
