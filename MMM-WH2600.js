@@ -211,18 +211,39 @@ Module.register("MMM-WH2600", {
 	  return "templates/default.njk"
   },
 
-	getTemplateData: function () {
-		if (!this.loaded) {
-			return {
-				status: "Loading MMM-WH2600...",
-				config: this.config
-			};
-		}
+  getTemplateData: function () {
+    if (!this.loaded) {
+      return {
+        status: "Loading MMM-WH2600...",
+        config: this.config
+      };
+    }
 
-		if (this.dataNotificationCurrentData !== undefined) {
-			return {
-				config: this.config,
-				data: this.dataNotificationCurrentData,
+    if (this.dataNotificationCurrentData !== undefined) {
+      var currentWindDir = parseFloat(this.dataNotificationCurrentData.winddir);
+      var windDirFrom = 0;
+      var windDirTo = 0;
+
+      if (Number.isFinite(currentWindDir)) {
+        if (typeof this.lastWindDir !== "number") {
+          this.lastWindDir = currentWindDir;
+        }
+        windDirFrom = this.lastWindDir;
+        windDirTo = currentWindDir;
+
+        var delta = windDirTo - windDirFrom;
+        if (delta > 180) {
+          windDirTo -= 360;
+        } else if (delta < -180) {
+          windDirTo += 360;
+        }
+
+        this.lastWindDir = windDirTo;
+      }
+
+      return {
+        config: this.config,
+        data: this.dataNotificationCurrentData,
         indoorSensorLabel: this.config.indoorSensors[this.currentIndoorSensorIndex].label,
         indoorSensorTemperature: this.dataNotificationCurrentData[this.config.indoorSensors[this.currentIndoorSensorIndex].temp],
         indoorSensorHumidity: this.dataNotificationCurrentData[this.config.indoorSensors[this.currentIndoorSensorIndex].humid],
@@ -232,6 +253,8 @@ Module.register("MMM-WH2600", {
         atmosphericPressure: this.calculateRelativeAtmosphericPressure(this.dataNotificationCurrentData.absbarometer),
         perceivedTemperature: this.calculatePerceivedTemperature(this.dataNotificationCurrentData),
         windDirText: this.translate(this.degreesToCompass(this.dataNotificationCurrentData.winddir)),
+        windDirFrom: windDirFrom,
+        windDirTo: windDirTo,
         beaufort: this.getBeaufort(this.dataNotificationCurrentData.gustspeed),
         uvIndexColor: this.uvIndexToColor(this.dataNotificationCurrentData.uvi),
         translations: {

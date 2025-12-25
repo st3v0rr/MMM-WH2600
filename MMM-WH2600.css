@@ -13,7 +13,7 @@
 }
 
 .wh2600-panel {
-  width: 25%;
+  width: 31%;
   padding-top: 10px;
 }
 
@@ -50,16 +50,29 @@
   margin-right: 5px;
 }
 
+.wh2600-wind-direction {
+  display: inline-block;
+  transform-origin: 50% 50%;
+  transform: rotate(calc(var(--wh2600-winddir-to) + 180deg));
+  animation: wh2600-wind-rotate 2s ease;
+  animation-fill-mode: both;
+}
+
+@keyframes wh2600-wind-rotate {
+  from {
+    transform: rotate(calc(var(--wh2600-winddir-from) + 180deg));
+  }
+  to {
+    transform: rotate(calc(var(--wh2600-winddir-to) + 180deg));
+  }
+}
+
 .wh2600-metric-value {
   flex: 1;
   text-align: right;
 }
 
 .wh2600-unit {
-  color: #777;
-  margin-left: 5px;
-  font-size: 0.7em;
-  font-weight: 300;
 }
 
 .wh2600-temp-container {
@@ -100,6 +113,10 @@
 @media (prefers-reduced-motion: reduce) {
   .wh2600-panel:first-child .wh2600-panel-title,
   .wh2600-panel:first-child .wh2600-temp-container {
+    animation: none;
+  }
+
+  .wh2600-wind-direction {
     animation: none;
   }
 }
