@@ -113,15 +113,10 @@ class WH2600 {
         const client = new net.Socket();
 
         client.connect(45000, ipAddr, function () {
-          console.debug("Connected");
-
           client.write(buildPacket(command, data));
         });
 
         client.on("data", function (buffer) {
-          console.debug(
-            `Received Data: ${buffer != null ? buffer.length : 0} bytes`
-          );
           client.destroy(); // kill client after server's response as to not mix up commands
 
           checkResponse(buffer, command, (resData, err) => {
@@ -130,7 +125,6 @@ class WH2600 {
         });
 
         client.on("close", function () {
-          console.debug("Connection closed");
         });
       });
     };
