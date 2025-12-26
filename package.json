@@ -1,10 +1,21 @@
 {
 	"name": "MMM-WH2600",
 	"version": "1.0.0",
-	"description": "A Module for MagicMirror2 designed to integrate with a WH2600 System. Dependent on your configuration it can display several statistics.",
+	"description": "A Module for MagicMirror² designed to integrate with a WH2600 System. Dependent on your configuration it can display several statistics.",
 	"main": "MMM-WH2600.js",
 	"author": "Stefan Nachtrab",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/st3v0rr/MMM-WH2600.git"
+	},
+	"keywords": [
+		"magicmirror",
+		"magicmirror-module",
+		"weather",
+		"wh2600",
+		"weatherstation"
+	],
 	"devDependencies": {
 		"babel-eslint": "^10.1.0",
 		"eslint": "^9.39.2",

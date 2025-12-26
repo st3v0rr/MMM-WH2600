@@ -1,4 +1,4 @@
-/* Magic Mirror
+/* MagicMirror²
  * Node Helper: MMM-WH2600
  *
  * By Stefan Nachtrab
