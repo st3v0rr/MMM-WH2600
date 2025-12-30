@@ -18,7 +18,8 @@ Module.register("MMM-WH2600", {
       {
         label: "",
         temp: "intemp",
-        humid: "inhumid"
+        humid: "inhumid",
+        ventilation: true
       }
     ],
     outdoorSensors: [
@@ -57,10 +58,14 @@ Module.register("MMM-WH2600", {
 
   nextIndoorSensor() {
     if (this.config.indoorSensors.length > 1) {
-      this.currentIndoorSensorIndex++;
-      if (this.currentIndoorSensorIndex === this.config.indoorSensors.length) {
-        this.currentIndoorSensorIndex = 0;
-      }
+      const nextIndex =
+        (this.currentIndoorSensorIndex + 1) %
+        this.config.indoorSensors.length;
+      this.currentIndoorSensorIndex = this.getAvailableSensorIndex(
+        this.config.indoorSensors,
+        nextIndex,
+        this.dataNotificationCurrentData
+      );
     }
 
     return this.currentIndoorSensorIndex;
@@ -68,14 +73,50 @@ Module.register("MMM-WH2600", {
 
   nextOutdoorSensor() {
     if (this.config.outdoorSensors.length > 1) {
-      this.currentOutdoorSensorIndex++;
-      if (
-        this.currentOutdoorSensorIndex === this.config.outdoorSensors.length
-      ) {
-        this.currentOutdoorSensorIndex = 0;
-      }
+      const nextIndex =
+        (this.currentOutdoorSensorIndex + 1) %
+        this.config.outdoorSensors.length;
+      this.currentOutdoorSensorIndex = this.getAvailableSensorIndex(
+        this.config.outdoorSensors,
+        nextIndex,
+        this.dataNotificationCurrentData
+      );
     }
     return this.currentOutdoorSensorIndex;
+  },
+
+  toNumber(value) {
+    const numberValue = parseFloat(value);
+    return Number.isFinite(numberValue) ? numberValue : null;
+  },
+
+  hasSensorData(sensor, data) {
+    if (!sensor || !data) {
+      return false;
+    }
+    const tempValue = this.toNumber(data[sensor.temp]);
+    const humidValue = this.toNumber(data[sensor.humid]);
+    return tempValue !== null && humidValue !== null;
+  },
+
+  getAvailableSensorIndex(sensors, startIndex, data) {
+    if (!Array.isArray(sensors) || sensors.length === 0) {
+      return 0;
+    }
+    const safeStartIndex = Math.min(
+      Math.max(startIndex, 0),
+      sensors.length - 1
+    );
+    if (!data) {
+      return safeStartIndex;
+    }
+    for (let offset = 0; offset < sensors.length; offset++) {
+      const index = (safeStartIndex + offset) % sensors.length;
+      if (this.hasSensorData(sensors[index], data)) {
+        return index;
+      }
+    }
+    return safeStartIndex;
   },
 
   calculateRelativeAtmosphericPressure(atmosphericPressure) {
@@ -111,6 +152,108 @@ Module.register("MMM-WH2600", {
     }
 
     return parseFloat(at.toFixed(1));
+  },
+
+  calculateVentilationRecommendation(data, options = {}) {
+    const toNumber = (value) => {
+      const numberValue = parseFloat(value);
+      return Number.isFinite(numberValue) ? numberValue : null;
+    };
+
+    const meanOfKeys = (keys, fallback) => {
+      const values = keys
+        .map((key) => toNumber(data[key]))
+        .filter((value) => value !== null);
+      if (values.length === 0) {
+        return fallback;
+      }
+      const sum = values.reduce((total, value) => total + value, 0);
+      return sum / values.length;
+    };
+
+    const indoorVentSensors = this.config.indoorSensors.filter(
+      (sensor) => sensor.ventilation
+    );
+    if (indoorVentSensors.length === 0) {
+      return null;
+    }
+    const indoorTempKeys = indoorVentSensors.map((sensor) => sensor.temp);
+    const indoorHumidKeys = indoorVentSensors.map((sensor) => sensor.humid);
+    const outdoorTempKeys = this.config.outdoorSensors.map(
+      (sensor) => sensor.temp
+    );
+    const outdoorHumidKeys = this.config.outdoorSensors.map(
+      (sensor) => sensor.humid
+    );
+    const fallbackIndoorTemp = toNumber(data[indoorVentSensors[0]?.temp]);
+    const fallbackIndoorHumid = toNumber(data[indoorVentSensors[0]?.humid]);
+    const fallbackOutdoorTemp = toNumber(
+      data[this.config.outdoorSensors[0]?.temp]
+    );
+    const fallbackOutdoorHumid = toNumber(
+      data[this.config.outdoorSensors[0]?.humid]
+    );
+
+    // Aktuellen Indoor/Outdoor-Sensor nutzen, sonst Mittelwert-Fallback.
+    const indoorTemp =
+      toNumber(options.indoorTemp) ??
+      meanOfKeys(indoorTempKeys, fallbackIndoorTemp);
+    const indoorHumid =
+      toNumber(options.indoorHumid) ??
+      meanOfKeys(indoorHumidKeys, fallbackIndoorHumid);
+    const outdoorTemp =
+      toNumber(options.outdoorTemp) ??
+      meanOfKeys(outdoorTempKeys, fallbackOutdoorTemp);
+    const outdoorHumid =
+      toNumber(options.outdoorHumid) ??
+      meanOfKeys(outdoorHumidKeys, fallbackOutdoorHumid);
+
+    if (
+      indoorTemp === null ||
+      indoorHumid === null ||
+      outdoorTemp === null ||
+      outdoorHumid === null
+    ) {
+      return null;
+    }
+
+    // Absolute Feuchte in g/m3 nach Standardformel.
+    const absoluteHumidity = (temperatureC, relativeHumidity) => {
+      const saturationPressure =
+        6.112 * Math.exp((17.67 * temperatureC) / (temperatureC + 243.5));
+      return (
+        (saturationPressure * (relativeHumidity / 100) * 2.1674) /
+        (273.15 + temperatureC)
+      );
+    };
+
+    const absoluteHumidityIn = absoluteHumidity(indoorTemp, indoorHumid);
+    const absoluteHumidityOut = absoluteHumidity(outdoorTemp, outdoorHumid);
+    const diff = absoluteHumidityIn - absoluteHumidityOut;
+
+    let score = 3;
+    if (diff > 4) {
+      score = 5;
+    } else if (diff >= 1) {
+      score = 4;
+    } else if (diff >= 0) {
+      score = 3;
+    } else if (diff >= -2) {
+      score = 2;
+    } else {
+      score = 1;
+    }
+
+    // Komfort-Schutz: trockene Innenluft begrenzt die Empfehlung auf OK.
+    if (indoorHumid < 35 && score > 3) {
+      score = 3;
+    }
+
+    return {
+      score,
+      absoluteHumidityIn: parseFloat(absoluteHumidityIn.toFixed(1)),
+      absoluteHumidityOut: parseFloat(absoluteHumidityOut.toFixed(1))
+    };
   },
 
   degreesToCompass: function (degrees) {
@@ -241,15 +384,58 @@ Module.register("MMM-WH2600", {
         this.lastWindDir = windDirTo;
       }
 
+      const currentIndoorSensor =
+        this.config.indoorSensors[
+          this.getAvailableSensorIndex(
+            this.config.indoorSensors,
+            this.currentIndoorSensorIndex,
+            this.dataNotificationCurrentData
+          )
+        ];
+      this.currentIndoorSensorIndex = this.config.indoorSensors.indexOf(
+        currentIndoorSensor
+      );
+      const currentOutdoorSensor =
+        this.config.outdoorSensors[
+          this.getAvailableSensorIndex(
+            this.config.outdoorSensors,
+            this.currentOutdoorSensorIndex,
+            this.dataNotificationCurrentData
+          )
+        ];
+      this.currentOutdoorSensorIndex = this.config.outdoorSensors.indexOf(
+        currentOutdoorSensor
+      );
+      const currentIndoorTemp =
+        this.dataNotificationCurrentData[currentIndoorSensor.temp];
+      const currentIndoorHumid =
+        this.dataNotificationCurrentData[currentIndoorSensor.humid];
+      const currentOutdoorTemp =
+        this.dataNotificationCurrentData[currentOutdoorSensor.temp];
+      const currentOutdoorHumid =
+        this.dataNotificationCurrentData[currentOutdoorSensor.humid];
+      const ventilationEnabled = Boolean(currentIndoorSensor.ventilation);
+      const ventilationRecommendation = ventilationEnabled
+        ? this.calculateVentilationRecommendation(
+            this.dataNotificationCurrentData,
+            {
+              indoorTemp: currentIndoorTemp,
+              indoorHumid: currentIndoorHumid,
+              outdoorTemp: currentOutdoorTemp,
+              outdoorHumid: currentOutdoorHumid
+            }
+          )
+        : null;
+
       return {
         config: this.config,
         data: this.dataNotificationCurrentData,
         indoorSensorLabel: this.config.indoorSensors[this.currentIndoorSensorIndex].label,
-        indoorSensorTemperature: this.dataNotificationCurrentData[this.config.indoorSensors[this.currentIndoorSensorIndex].temp],
-        indoorSensorHumidity: this.dataNotificationCurrentData[this.config.indoorSensors[this.currentIndoorSensorIndex].humid],
+        indoorSensorTemperature: currentIndoorTemp,
+        indoorSensorHumidity: currentIndoorHumid,
         outdoorSensorLabel: this.config.outdoorSensors[this.currentOutdoorSensorIndex].label,
-        outdoorSensorTemperature: this.dataNotificationCurrentData[this.config.outdoorSensors[this.currentOutdoorSensorIndex].temp],
-        outdoorSensorHumidity: this.dataNotificationCurrentData[this.config.outdoorSensors[this.currentOutdoorSensorIndex].humid],
+        outdoorSensorTemperature: currentOutdoorTemp,
+        outdoorSensorHumidity: currentOutdoorHumid,
         atmosphericPressure: this.calculateRelativeAtmosphericPressure(this.dataNotificationCurrentData.absbarometer),
         perceivedTemperature: this.calculatePerceivedTemperature(this.dataNotificationCurrentData),
         windDirText: this.translate(this.degreesToCompass(this.dataNotificationCurrentData.winddir)),
@@ -257,6 +443,7 @@ Module.register("MMM-WH2600", {
         windDirTo: windDirTo,
         beaufort: this.getBeaufort(this.dataNotificationCurrentData.gustspeed),
         uvIndexColor: this.uvIndexToColor(this.dataNotificationCurrentData.uvi),
+        ventilationRecommendation: ventilationRecommendation,
         translations: {
           wind: this.translate("WIND"),
           uvindex: this.translate("UVINDEX"),

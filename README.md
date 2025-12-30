@@ -55,12 +55,14 @@ To use this module, add the following configuration block to the modules array i
           { //default
             label: "entrance", //place a useful location info
             temp: "intemp", //is the default indoor sensor
-            humid: "inhumid" //is the default indoor humidity
+            humid: "inhumid", //is the default indoor humidity
+            ventilation: false //calculate and display ventilation recommendation
           },
           { //optional: additional sensors
             label: "living room", //place a useful explanation e. g. "living room"
             temp: "temp1", //it's always "temp+channelnumber" up to 8
-            humid: "humid1" //it's always "humid+channelnumber" up to 8
+            humid: "humid1", //it's always "humid+channelnumber" up to 8
+            ventilation: true //calculate and display ventilation recommendation
           },
         ],
         outdoorSensors: [ //all your outdoor temperature  sensors

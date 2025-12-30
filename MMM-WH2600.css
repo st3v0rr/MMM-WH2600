@@ -12,13 +12,19 @@
   gap: 15px;
 }
 
-.wh2600-panel {
-  width: 31%;
+.wh2600-panel-temp {
+  width: 40%;
   padding-top: 10px;
 }
 
-.wh2600-panel:first-child .wh2600-panel-title,
-.wh2600-panel:first-child .wh2600-temp-container {
+.wh2600-panel {
+  width: 25%;
+  padding-top: 10px;
+}
+
+.wh2600-panel-temp .wh2600-panel-title,
+.wh2600-panel-temp .wh2600-temp-container,
+.wh2600-panel-temp .wh2600-ventilation-badge {
   animation: wh2600-fade-cycle 1s ease-in-out infinite;
   animation-duration: var(--wh2600-switch-interval, 1s);
   animation-fill-mode: both;
@@ -87,6 +93,39 @@
   align-items: center;
 }
 
+.wh2600-ventilation-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #444;
+  color: #f4f4f4;
+}
+
+.wh2600-ventilation-score-5 {
+  background: darkgreen;
+  color: #fff;
+}
+
+.wh2600-ventilation-score-4 {
+  background: green;
+  color: #fff;
+}
+
+.wh2600-ventilation-score-3 {
+  background: gold;
+  color: #111;
+}
+
+.wh2600-ventilation-score-2 {
+  background: orange;
+  color: #111;
+}
+
+.wh2600-ventilation-score-1 {
+  background: red;
+  color: #fff;
+}
+
 .wh2600-waermepumpe-section {
   margin-top: 20px;
 }
@@ -111,8 +150,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wh2600-panel:first-child .wh2600-panel-title,
-  .wh2600-panel:first-child .wh2600-temp-container {
+  .wh2600-panel-temp .wh2600-panel-title,
+  .wh2600-panel-temp .wh2600-temp-container,
+  .wh2600-panel-temp .wh2600-ventilation-badge {
     animation: none;
   }
 

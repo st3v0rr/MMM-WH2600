@@ -4,13 +4,18 @@
   <div class="wh2600-container" style="--wh2600-switch-interval: {{ config.tempSwitchInterval }}ms;">
     <div class="wh2600-dashboard">
 
-      <div class="wh2600-panel">
+      <div class="wh2600-panel-temp">
         <div class="wh2600-panel-title">{{ indoorSensorLabel }}</div>
         <div class="wh2600-temp-container">
           <div class="wh2600-block">
             <span class="wh2600-metric-icon"><i class="wi wi-thermometer"></i></span>
-            <span class="wh2600-metric-value medium bright">{{ indoorSensorTemperature }}<span class="wh2600-unit small bright">°C</span></span>
+            <span class="wh2600-metric-value medium bright">{{ indoorSensorTemperature | round(1) | replace(".", ",") }}<span class="wh2600-unit small bright">°C</span></span>
           </div>
+          {% if ventilationRecommendation %}
+            <div class="wh2600-block">
+              <span class="wh2600-metric-icon"><i class="wi wi-strong-wind xsmall wh2600-ventilation-badge wh2600-ventilation-score-{{ ventilationRecommendation.score }}"></i></span>
+            </div>
+          {% endif %}
           <div class="wh2600-block">
             <span class="wh2600-metric-icon"><i class="wi wi-humidity"></i></span>
             <span class="wh2600-metric-value medium bright">{{ indoorSensorHumidity }}<span class="wh2600-unit small bright">%</span></span>
@@ -21,7 +26,7 @@
         <div class="wh2600-temp-container">
           <div class="wh2600-block">
             <span class="wh2600-metric-icon"><i class="wi wi-thermometer"></i></span>
-            <span class="wh2600-metric-value medium bright">{{ outdoorSensorTemperature }}<span class="wh2600-unit small bright">°C</span></span>
+            <span class="wh2600-metric-value medium bright">{{ outdoorSensorTemperature | round(1) | replace(".", ",") }}<span class="wh2600-unit small bright">°C</span></span>
           </div>
           <div class="wh2600-block">
             <span class="wh2600-metric-icon"><i class="wi wi-humidity"></i></span>
@@ -30,7 +35,7 @@
         </div>
         <div class="wh2600-metric-row">
           <span class="wh2600-metric-icon"><i class="wi wi-alien small"></i></span>
-          <span class="wh2600-metric-value medium bright">{{ perceivedTemperature }}<span class="wh2600-unit small bright">°C</span></span>
+          <span class="wh2600-metric-value medium bright">{{ perceivedTemperature | round(1) | replace(".", ",") }}<span class="wh2600-unit small bright">°C</span></span>
         </div>
         <div class="wh2600-metric-row">
           <span class="wh2600-metric-icon"><i class="wi wi-barometer small"></i></span>
@@ -42,24 +47,24 @@
         <div class="wh2600-panel-title">{{ translations.wind }}</div>
         <div class="wh2600-metric-row">
           <div class="wh2600-metric-icon"><i class="wi wi-windy small"></i></div>
-          <div class="wh2600-metric-value medium bright">{{ data.windspeed }}<span class="wh2600-unit small bright"> m/s</span></div>
+          <div class="wh2600-metric-value medium bright">{{ data.windspeed | round(1) | replace(".", ",") }}<span class="wh2600-unit small bright"> m/s</span></div>
         </div>
         <div class="wh2600-metric-row">
           <span class="wh2600-metric-icon"><i class="wi wi-wind-beaufort-{{ beaufort }} small"></i></span>
-          <span class="wh2600-metric-value medium bright">{{ data.gustspeed }}<span class="wh2600-unit small bright"> m/s</span></span>
+          <span class="wh2600-metric-value medium bright">{{ data.gustspeed | round(1) | replace(".", ",") }}<span class="wh2600-unit small bright"> m/s</span></span>
         </div>
         <div class="wh2600-metric-row">
           <span class="wh2600-metric-icon"><i class="wi wi-day-windy small"></i></span>
-          <span class="wh2600-metric-value medium bright">{{ data.daymaxwind }}<span class="wh2600-unit small bright"> m/s</span></span>
+          <span class="wh2600-metric-value medium bright">{{ data.daymaxwind | round(1) | replace(".", ",") }}<span class="wh2600-unit small bright"> m/s</span></span>
         </div>
         <div class="wh2600-metric-row">
           <span class="wh2600-metric-icon">
             <i
-              class="wi wi-wind xlarge wh2600-wind-direction"
+              class="wi wi-wind xlarge wh2600-wind-direction bright"
               style="--wh2600-winddir-from: {{ windDirFrom }}deg; --wh2600-winddir-to: {{ windDirTo }}deg;"
             ></i>
           </span>
-          <span class="wh2600-metric-value bright">{{ data.winddir }}°<span class="wh2600-unit small bright"> {{ windDirText }}</span></span>
+          <span class="wh2600-metric-value bright">{{ windDirText }}</span>
         </div>
       </div>
 
