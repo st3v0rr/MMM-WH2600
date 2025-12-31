@@ -1,7 +1,8 @@
 {
-	"name": "MMM-WH2600",
+	"name": "mmm-wh2600",
 	"version": "1.0.0",
 	"description": "A Module for MagicMirror² designed to integrate with a WH2600 System. Dependent on your configuration it can display several statistics.",
+	"type": "commonjs",
 	"main": "MMM-WH2600.js",
 	"author": "Stefan Nachtrab",
 	"license": "MIT",
@@ -17,7 +18,6 @@
 		"weatherstation"
 	],
 	"devDependencies": {
-		"babel-eslint": "^10.1.0",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.4",
