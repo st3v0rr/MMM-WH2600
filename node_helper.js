@@ -6,7 +6,7 @@
  */
 
 var NodeHelper = require("node_helper");
-const WH2600 = require("./WH2600");
+const EWG = require('ecowitt-gateway');
 
 module.exports = NodeHelper.create({
   /* socketNotificationReceived(notification, payload)
@@ -17,14 +17,15 @@ module.exports = NodeHelper.create({
    */
   socketNotificationReceived: function (notification, payload) {
     var self = this;
-
+    const gw = new EWG(payload.config.ipWH2600, payload.config.portWH2600); //port default is 45000 and is optional
     if (notification === "MMM-WH2600-NOTIFICATION_CURRENTDATA_REQUESTED") {
-      new WH2600(payload.config.ipWH2600).getLiveData().then((body) => {
-        self.sendSocketNotification(
-          "MMM-WH2600-NOTIFICATION_CURRENTDATA_RECEIVED",
-          body
-        );
-      });
+      gw.getLiveData()
+        .then(body => {
+          self.sendSocketNotification(
+            "MMM-WH2600-NOTIFICATION_CURRENTDATA_RECEIVED",
+            body
+          );
+        });
     }
   }
 });

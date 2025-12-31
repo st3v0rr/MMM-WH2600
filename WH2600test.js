@@ -1,3 +1,7 @@
-const WH2600 = require("./WH2600");
+const EWG = require('ecowitt-gateway');
+const gw = new EWG('192.168.x.x', 45000); //port default is 45000 and is optional
 
-new WH2600("192.168.0.10").getLiveData().then((body) => console.log(body));
+gw.getLiveData()
+.then(data => {
+  console.log(JSON.stringify(data));
+});

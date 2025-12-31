@@ -11,6 +11,7 @@ Module.register("MMM-WH2600", {
   defaults: {
     updateInterval: 10000,
     ipWH2600: "", //ip of your WH2600 data logger
+    portWH2600: 45000, //port of your WH2600 data logger
     locationInfo: "",
     locationMetersAboveSeaLevel: 0, //location of the weather station - important for atmospheric pressure calculation
     tempSwitchInterval: 5000,

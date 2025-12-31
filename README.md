@@ -84,14 +84,15 @@ To use this module, add the following configuration block to the modules array i
 
 ## Configuration options
 
-| Option                            | Description
-|-----------------                  |-----------
-| `ipWH2600`                        | *Required* IP of the WH2600 data logger
-| `locationInfo`                    | *Optional* Some additional informations to the location of the WH2600
-| `locationMetersAboveSeaLevel`     | *Optional* Nice to have for correct calcluation of the atmospheric pressure
-| `tempSwitchInterval`              | *Optional* Time between switching the temp sensors (default is 5 seconds)
-| `indoorSensors`                   | *Optional* Show additional indoor sensors (see advanced config)
-| `outdoorSensors`                  | *Optional* Show additional outdoor sensors (see advanced config)
+| Option                        | Description
+|-------------------------------|-----------
+| `ipWH2600`                    | *Required* IP of the WH2600 data logger
+| `portWH2600`                  | *Optional* Port of the WH2600 data logger
+| `locationInfo`                | *Optional* Some additional informations to the location of the WH2600
+| `locationMetersAboveSeaLevel` | *Optional* Nice to have for correct calcluation of the atmospheric pressure
+| `tempSwitchInterval`          | *Optional* Time between switching the temp sensors (default is 5 seconds)
+| `indoorSensors`               | *Optional* Show additional indoor sensors (see advanced config)
+| `outdoorSensors`              | *Optional* Show additional outdoor sensors (see advanced config)
 
 ## Samples
 ![alt text](https://github.com/st3v0rr/MMM-WH2600/raw/main/docs/WH2600.png "Example")
