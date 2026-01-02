@@ -25,6 +25,9 @@ module.exports = NodeHelper.create({
             "MMM-WH2600-NOTIFICATION_CURRENTDATA_RECEIVED",
             body
           );
+        })
+        .catch(error => {
+          console.error("MMM-WH2600 node_helper getLiveData failed:", error);
         });
     }
   }

@@ -18,6 +18,7 @@
 		"weatherstation"
 	],
 	"devDependencies": {
+		"@eslint/js": "^9.39.2",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.4",
@@ -27,5 +28,8 @@
 	},
 	"dependencies": {
 		"ecowitt-gateway": "^1.0.4"
+	},
+	"scripts": {
+		"lint": "eslint ."
 	}
 }
